@@ -28,6 +28,8 @@ public class AuthStrategyFactory : IAuthStrategyFactory
                 ?? throw new InvalidOperationException("GoogleAuthStrategy is not registered."),
             "test" => _strategies.OfType<TestAuthStrategy>().FirstOrDefault() 
                 ?? throw new InvalidOperationException("TestAuthStrategy is not registered."),
+            "email" => _strategies.OfType<EmailAuthStrategy>().FirstOrDefault()
+                ?? throw new InvalidOperationException("EmailAuthStrategy is not registered."),
             _ => throw new NotSupportedException($"Authentication provider '{provider}' is not supported.")
         };
     }

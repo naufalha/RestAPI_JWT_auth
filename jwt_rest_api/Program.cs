@@ -38,6 +38,7 @@ builder.Services.AddDbContext<GameDbContext>(options =>
 // Configure Dependency Injection for Authentication Strategies
 builder.Services.AddScoped<IAuthStrategy, GoogleAuthStrategy>();
 builder.Services.AddScoped<IAuthStrategy, TestAuthStrategy>();
+builder.Services.AddScoped<IAuthStrategy, EmailAuthStrategy>();
 builder.Services.AddScoped<IAuthStrategyFactory, AuthStrategyFactory>();
 
 // Configure Dependency Injection for Services

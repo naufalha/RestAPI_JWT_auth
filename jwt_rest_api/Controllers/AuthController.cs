@@ -103,4 +103,45 @@ public class AuthController : BaseApiController
             return StatusCode(500, new { error = $"Test login failed: {ex.Message}" });
         }
     }
+
+    [HttpPost("login/email")]
+    public async Task<IActionResult> LoginEmail([FromBody] jwt_rest_api.Models.Dto.EmailAuthRequest request)
+    {
+        try
+        {
+            var strategy = _strategyFactory.GetStrategy("email");
+
+            // Format credential as "email:password"
+            var credential = $"{request.Email}:{request.Password}";
+            var authResult = await strategy.AuthenticateAsync(credential);
+
+            if (!authResult.IsSuccess)
+            {
+                return HandleResult(authResult);
+            }
+
+            var userPayload = authResult.Value!;
+            var userResult = await _gameService.GetOrCreateUserAsync(userPayload);
+
+            if (!userResult.IsSuccess)
+            {
+                return HandleResult(userResult);
+            }
+
+            var user = userResult.Value!;
+            var token = _tokenService.GenerateToken(user);
+
+            return Ok(new AuthResponse
+            {
+                Token = token,
+                UserId = user.Id,
+                Email = user.Email,
+                Name = user.Name
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = $"Email login failed: {ex.Message}" });
+        }
+    }
 }
