@@ -32,9 +32,9 @@ public class GameDbContext : DbContext
         {
             entity.HasKey(gp => gp.UserId);
             
-            // Map JSON properties to MySQL json type (or text/longtext fallback)
-            entity.Property(gp => gp.InventoryJson).HasColumnType("json");
-            entity.Property(gp => gp.StateDataJson).HasColumnType("json");
+            // Map JSON properties to PostgreSQL jsonb type
+            entity.Property(gp => gp.InventoryJson).HasColumnType("jsonb");
+            entity.Property(gp => gp.StateDataJson).HasColumnType("jsonb");
 
             // Define 1:1 relationship with User
             entity.HasOne(gp => gp.User)

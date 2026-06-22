@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using jwt_rest_api.Data;
 using jwt_rest_api.Services;
 using jwt_rest_api.Services.Authentication;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,24 +16,11 @@ builder.Services.AddControllers();
 // Configure OpenAPI
 builder.Services.AddOpenApi();
 
-// Configure MySQL Database using Pomelo EF Core
+// Configure PostgreSQL Database (Supabase)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<GameDbContext>(options =>
 {
-    ServerVersion serverVersion = new MySqlServerVersion(new Version(8, 0, 30)); // fallback
-    try
-    {
-        if (!string.IsNullOrEmpty(connectionString))
-        {
-            serverVersion = ServerVersion.AutoDetect(connectionString);
-        }
-    }
-    catch
-    {
-        // Fallback to standard version if MySQL server is offline during build
-    }
-    
-    options.UseMySql(connectionString, serverVersion);
+    options.UseNpgsql(connectionString);
 });
 
 // Configure Dependency Injection for Authentication Strategies
@@ -80,11 +68,11 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<GameDbContext>();
         context.Database.EnsureCreated();
-        Console.WriteLine("MySQL Database initialization checked/completed successfully.");
+        Console.WriteLine("Supabase PostgreSQL Database initialization checked/completed successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Warning: Database auto-initialization skipped or failed. Ensure your connection string is correct and MySQL is running. Error: {ex.Message}");
+        Console.WriteLine($"Warning: Database auto-initialization skipped or failed. Ensure your Supabase connection string is correct. Error: {ex.Message}");
     }
 }
 
@@ -92,6 +80,10 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options => 
+    {
+        options.WithTitle("Game REST API");
+    });
 }
 
 app.UseHttpsRedirection();
