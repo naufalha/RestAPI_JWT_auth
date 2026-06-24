@@ -48,8 +48,10 @@ public class GameController : BaseApiController
             Score = progress.Score,
             Coins = progress.Coins,
             Inventory = inventory,
-            StateData = stateData
+            StateData = stateData,
+            LastUpdated = progress.LastUpdated
         });
+
     }
 
     [HttpPost("progress")]

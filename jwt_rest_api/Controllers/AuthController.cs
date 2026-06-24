@@ -14,16 +14,27 @@ public class AuthController : BaseApiController
     private readonly IAuthStrategyFactory _strategyFactory;
     private readonly ITokenService _tokenService;
     private readonly IGameService _gameService;
+    private readonly IConfiguration _configuration;
 
     public AuthController(
         IAuthStrategyFactory strategyFactory,
         ITokenService tokenService,
-        IGameService gameService)
+        IGameService gameService,
+        IConfiguration configuration)
     {
         _strategyFactory = strategyFactory;
         _tokenService = tokenService;
         _gameService = gameService;
+        _configuration = configuration;
     }
+
+    [HttpGet("config")]
+    public IActionResult GetConfig()
+    {
+        var clientId = _configuration["GoogleAuth:ClientId"];
+        return Ok(new { googleClientId = clientId });
+    }
+
 
     [HttpPost("login/google")]
     public async Task<IActionResult> LoginGoogle([FromBody] GoogleAuthRequest request)

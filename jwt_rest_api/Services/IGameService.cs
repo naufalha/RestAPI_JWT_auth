@@ -11,4 +11,5 @@ public interface IGameService
     Task<Result<User>> GetOrCreateUserAsync(StrategyUserPayload payload);
     Task<Result<GameProgress>> GetProgressAsync(string userId);
     Task<Result> SaveProgressAsync(string userId, GameProgressDto progressDto);
+    Task<Result<AdminDashboardStatsDto>> GetAdminDashboardDataAsync();
 }

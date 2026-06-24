@@ -33,7 +33,9 @@ public abstract class BaseApiController : ControllerBase
             ResultType.NotFound => NotFound(new { error = result.ErrorMessage }),
             ResultType.ValidationError => BadRequest(new { error = result.ErrorMessage }),
             ResultType.Unauthorized => Unauthorized(new { error = result.ErrorMessage }),
+            ResultType.Conflict => Conflict(new { error = result.ErrorMessage }),
             _ => StatusCode(500, new { error = result.ErrorMessage })
+
         };
     }
 }

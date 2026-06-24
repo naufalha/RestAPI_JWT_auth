@@ -6,5 +6,7 @@ public enum ResultType
     NotFound,
     ValidationError,
     Unauthorized,
+    Conflict,
     Failure
 }
+

@@ -21,11 +21,12 @@ public class Result
     public static Result NotFound(string errorMessage) => new(false, ResultType.NotFound, errorMessage);
     public static Result ValidationError(string errorMessage) => new(false, ResultType.ValidationError, errorMessage);
     public static Result Unauthorized(string errorMessage) => new(false, ResultType.Unauthorized, errorMessage);
+    public static Result Conflict(string errorMessage) => new(false, ResultType.Conflict, errorMessage);
 }
 
 public class Result<T> : Result
 {
-    public T? Value { get; }
+    public T? Value { get; set; }
 
     private Result(T? value, bool isSuccess, ResultType type, string errorMessage)
         : base(isSuccess, type, errorMessage)
@@ -46,4 +47,8 @@ public class Result<T> : Result
         
     public static new Result<T> Unauthorized(string errorMessage) 
         => new(default, false, ResultType.Unauthorized, errorMessage);
+
+    public static new Result<T> Conflict(string errorMessage)
+        => new(default, false, ResultType.Conflict, errorMessage);
 }
+

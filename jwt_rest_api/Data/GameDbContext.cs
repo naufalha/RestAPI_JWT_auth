@@ -11,6 +11,7 @@ public class GameDbContext : DbContext
 
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<GameProgress> GameProgresses { get; set; } = null!;
+    public DbSet<RequestLog> RequestLogs { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

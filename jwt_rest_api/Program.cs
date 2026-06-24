@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using jwt_rest_api.Data;
 using jwt_rest_api.Services;
 using jwt_rest_api.Services.Authentication;
+using jwt_rest_api.Middlewares;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -86,10 +87,17 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// Tambahkan middleware logging request custom
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 app.UseHttpsRedirection();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

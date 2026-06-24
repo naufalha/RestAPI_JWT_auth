@@ -12,4 +12,8 @@ public class GameProgressDto
     
     // Custom JSON payload (e.g. coordinates, inventory stats)
     public JsonElement StateData { get; set; }
+    
+    // Concurrency check timestamp
+    public System.DateTime? LastUpdated { get; set; }
 }
+
