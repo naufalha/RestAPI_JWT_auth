@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using jwt_rest_api.Data;
 using jwt_rest_api.Services;
 using jwt_rest_api.Services.Authentication;
@@ -14,6 +15,36 @@ builder.Services.AddControllers();
 
 // Configure OpenAPI
 builder.Services.AddOpenApi();
+
+// Configure Swagger/OpenAPI details
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo 
+    { 
+        Title = "Game Backend API", 
+        Version = "v1",
+        Description = "API for Game Authentication and Progress Syncing"
+    });
+    
+    // Configure JWT Authentication support in Swagger UI
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer 12345abcdef'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecuritySchemeReference("Bearer", document),
+            new List<string>()
+        }
+    });
+});
 
 // Configure MySQL Database using Pomelo EF Core
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -91,6 +122,12 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Game Backend API v1");
+        options.RoutePrefix = "swagger"; // Available at /swagger
+    });
 }
 
 app.UseHttpsRedirection();
