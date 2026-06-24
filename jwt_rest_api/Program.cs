@@ -34,6 +34,8 @@ builder.Services.AddScoped<IAuthStrategyFactory, AuthStrategyFactory>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IGameService, GameService>();
 
+// Tambahkan baris ini untuk menghidupkan AutoMapper!
+builder.Services.AddAutoMapper(typeof(Program));
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] 
     ?? throw new InvalidOperationException("JWT Signing Key is not configured in appsettings.json.");

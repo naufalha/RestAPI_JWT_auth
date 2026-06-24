@@ -7,16 +7,20 @@ using jwt_rest_api.Data;
 using jwt_rest_api.Models;
 using jwt_rest_api.Models.Dto;
 using jwt_rest_api.Services.Authentication;
+using AutoMapper;
+
 
 namespace jwt_rest_api.Services;
 
 public class GameService : IGameService
 {
-    private readonly GameDbContext _dbContext;
+        private readonly GameDbContext _dbContext;
+    private readonly IMapper _mapper; // Tambahkan ini
 
-    public GameService(GameDbContext dbContext)
+    public GameService(GameDbContext dbContext, IMapper mapper) // Tambahkan IMapper di sini
     {
         _dbContext = dbContext;
+        _mapper = mapper; // Tambahkan ini
     }
 
     public async Task<Result<User>> GetOrCreateUserAsync(StrategyUserPayload payload)
@@ -150,7 +154,7 @@ public class GameService : IGameService
                 }
             }
 
-            // Serialize Inventory
+                       // Serialize Inventory
             var inventoryJson = JsonSerializer.Serialize(progressDto.Inventory);
             
             // Serialize StateData

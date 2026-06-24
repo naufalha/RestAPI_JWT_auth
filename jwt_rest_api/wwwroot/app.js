@@ -24,16 +24,16 @@ async function fetchDashboardData() {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (response.status === 401 || response.status === 403) {
             // Token expired or invalid
             localStorage.removeItem('token');
             window.location.href = '/login.html';
             return;
         }
-        
+
         if (!response.ok) throw new Error('Failed to fetch dashboard data');
-        
+
         const data = await response.json();
         updateUI(data);
     } catch (error) {
@@ -42,15 +42,22 @@ async function fetchDashboardData() {
 }
 
 function logout() {
+    // 1. Tampilkan popup pesan ke pengguna
+    alert("Berhasil Logout dari Admin Dashboard (Mode Simulasi)");
+
+    // 2. Hapus token (jika ada)
     localStorage.removeItem('token');
-    window.location.href = '/login.html';
+
+    // 3. Refresh halaman ke halaman utama (karena kita belum punya halaman login.html)
+    window.location.href = '/';
 }
+
 
 function updateUI(data) {
     // 1. Update Top Metrics
     document.getElementById('metric-users').innerText = data.totalUsers;
     document.getElementById('metric-requests').innerText = data.totalRequests;
-    
+
     // Calculate Avg Level
     let avgLevel = 0;
     if (data.players && data.players.length > 0) {
@@ -62,7 +69,7 @@ function updateUI(data) {
     // 2. Update Table
     const tbody = document.getElementById('player-table-body');
     tbody.innerHTML = '';
-    
+
     if (data.players && data.players.length > 0) {
         data.players.forEach(p => {
             let badgeClass = 'bg-slate-100 text-slate-600';
@@ -109,18 +116,18 @@ function updateUI(data) {
 function updateCharts(data) {
     // ---- Traffic Line Chart (Mocked time series based on total requests to simulate live data) ----
     const ctxTraffic = document.getElementById('trafficChart').getContext('2d');
-    
+
     // Create some fake historical "requests per minute" points
     const now = new Date();
     const labels = [];
     const points = [];
-    
+
     for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getTime() - i * 60000); // last 5 minutes
         labels.push(`${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`);
-        
+
         // Mock fluctuating requests per minute (e.g. between 2 and 15)
-        points.push(Math.floor(Math.random() * 14) + 2); 
+        points.push(Math.floor(Math.random() * 14) + 2);
     }
 
     if (trafficChartInstance) {
@@ -152,7 +159,7 @@ function updateCharts(data) {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { 
+                    y: {
                         beginAtZero: true,
                         suggestedMax: 20,
                         grid: { borderDash: [4, 4], color: '#e2e8f0', drawBorder: false }
@@ -167,7 +174,7 @@ function updateCharts(data) {
 
     // ---- Psycho Profile Donut Chart ----
     const ctxPsycho = document.getElementById('psychoChart').getContext('2d');
-    
+
     // Count profiles
     let empathetic = 0, pragmatic = 0, neutral = 0;
     data.players.forEach(p => {
@@ -219,9 +226,9 @@ function updateCharts(data) {
 function escapeHtml(unsafe) {
     if (!unsafe) return '';
     return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

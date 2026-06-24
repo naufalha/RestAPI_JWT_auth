@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekatva Admin - Users</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS v4 Play CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden bg-slate-50 text-slate-700">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 h-full flex flex-col py-6 px-4 shrink-0">
+        <div class="flex items-center gap-3 px-2 mb-10">
+            <div class="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center text-white font-bold">
+                A
+            </div>
+            <span class="font-bold text-lg text-slate-800 tracking-tight">Admin<span
+                    class="text-purple-600">Dashboard</span></span>
+        </div>
+        <div class="flex flex-col gap-2 flex-1">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2 mt-4">Main Menu</div>
+            <a href="/index.html"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-purple-600">
+                <i class="ph ph-squares-four text-xl"></i> Overview</a>
+
+            <!-- Active Menu -->
+            <a href="/users.html"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer bg-slate-100 text-purple-600">
+                <i class="ph ph-users text-xl"></i> Users & Players</a>
+
+            <div onclick="alert('Coming soon!')"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-purple-600">
+                <i class="ph ph-chart-line-up text-xl"></i> Analytics
+            </div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2 mt-6">System</div>
+            <div onclick="alert('Coming soon!')"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-purple-600">
+                <i class="ph ph-database text-xl"></i> Database Logs
+            </div>
+            <div onclick="alert('Coming soon!')"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-purple-600">
+                <i class="ph ph-gear text-xl"></i> Settings
+            </div>
+        </div>
+        <div class="mt-auto border-t border-slate-100 pt-4 px-2">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
+                    AD
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-800">Admin User</p>
+                    <p class="text-xs text-slate-500">Superadmin</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <!-- Main Content -->
+    <main class="flex-1 h-full overflow-y-auto relative">
+        <!-- Header -->
+        <header
+            class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10 flex items-center justify-between px-8">
+            <h1 class="text-xl font-semibold text-slate-800">User Management</h1>
+            <div class="flex items-center gap-4">
+                <button
+                    class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                    <i class="ph ph-bell text-xl"></i>
+                </button>
+                <button
+                    class="px-4 py-2 bg-red-50 text-red-600 border border-red-100 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center"
+                    onclick="logout()">
+                    <i class="ph ph-sign-out mr-1 text-lg"></i> Logout
+                </button>
+            </div>
+        </header>
+        <!-- Content Padding -->
+        <div class="p-8 max-w-7xl mx-auto">
+            <!-- Toolbar (Search & Filter) -->
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <div class="relative w-full sm:w-96">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="ph ph-magnifying-glass text-slate-400 text-lg"></i>
+                    </div>
+                    <input type="text"
+                        class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-slate-400"
+                        placeholder="Search by email or player ID...">
+                </div>
+                <div class="flex gap-2">
+                    <button
+                        class="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors flex items-center">
+                        <i class="ph ph-funnel mr-2"></i> Filter
+                    </button>
+                    <button
+                        class="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                        <i class="ph ph-plus mr-2"></i> Add Player
+                    </button>
+                </div>
+            </div>
+            <!-- Users Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-4 text-xs uppercase tracking-wider text-slate-500 font-semibold border-b border-slate-200 text-left">
+                                    Player Info</th>
+                                <th
+                                    class="px-6 py-4 text-xs uppercase tracking-wider text-slate-500 font-semibold border-b border-slate-200 text-left">
+                                    Level</th>
+                                <th
+                                    class="px-6 py-4 text-xs uppercase tracking-wider text-slate-500 font-semibold border-b border-slate-200 text-left">
+                                    Coins</th>
+                                <th
+                                    class="px-6 py-4 text-xs uppercase tracking-wider text-slate-500 font-semibold border-b border-slate-200 text-left">
+                                    Status</th>
+                                <th
+                                    class="px-6 py-4 text-xs uppercase tracking-wider text-slate-500 font-semibold border-b border-slate-200 text-right">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <!-- Dummy Row 1 -->
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-3">
+                                            J</div>
+                                        <div>
+                                            <div class="font-medium text-slate-800">john.doe@gmail.com</div>
+                                            <div class="text-xs text-slate-500">ID: usr_9x8f...</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        Level 12
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm font-medium text-slate-600">
+                                    <i class="ph ph-coins text-yellow-500 mr-1"></i> 1,450
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-slate-400 hover:text-purple-600 transition-colors px-2"><i
+                                            class="ph ph-pencil-simple text-lg"></i></button>
+                                    <button class="text-slate-400 hover:text-red-600 transition-colors px-2"><i
+                                            class="ph ph-trash text-lg"></i></button>
+                                </td>
+                            </tr>
+                            <!-- Dummy Row 2 -->
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold mr-3">
+                                            S</div>
+                                        <div>
+                                            <div class="font-medium text-slate-800">sarah.smith@yahoo.com</div>
+                                            <div class="text-xs text-slate-500">ID: usr_2a1b...</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        Level 5
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm font-medium text-slate-600">
+                                    <i class="ph ph-coins text-yellow-500 mr-1"></i> 320
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-slate-400 hover:text-purple-600 transition-colors px-2"><i
+                                            class="ph ph-pencil-simple text-lg"></i></button>
+                                    <button class="text-slate-400 hover:text-red-600 transition-colors px-2"><i
+                                            class="ph ph-trash text-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <!-- Dummy Row 3 -->
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold mr-3">
+                                            M</div>
+                                        <div>
+                                            <div class="font-medium text-slate-800">mike.tester@ekatva.com</div>
+                                            <div class="text-xs text-slate-500">ID: usr_77x9...</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                        Level 1
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm font-medium text-slate-600">
+                                    <i class="ph ph-coins text-yellow-500 mr-1"></i> 0
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        Banned
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-slate-400 hover:text-purple-600 transition-colors px-2"><i
+                                            class="ph ph-pencil-simple text-lg"></i></button>
+                                    <button class="text-slate-400 hover:text-red-600 transition-colors px-2"><i
+                                            class="ph ph-trash text-lg"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+                    <span class="text-sm text-slate-500">Showing 1 to 3 of 150 players</span>
+                    <div class="flex gap-1">
+                        <button
+                            class="px-3 py-1 border border-slate-200 rounded text-slate-400 bg-slate-50 cursor-not-allowed">Prev</button>
+                        <button class="px-3 py-1 border border-slate-200 rounded text-white bg-purple-600">1</button>
+                        <button
+                            class="px-3 py-1 border border-slate-200 rounded text-slate-600 hover:bg-slate-50">2</button>
+                        <button
+                            class="px-3 py-1 border border-slate-200 rounded text-slate-600 hover:bg-slate-50">3</button>
+                        <button
+                            class="px-3 py-1 border border-slate-200 rounded text-slate-600 hover:bg-slate-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="app.js"></script>
+</body>
+
+</html>
