@@ -12,9 +12,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchDashboardData();
+    updateAdminProfile();
+    
     // Auto refresh every 10 seconds
     setInterval(fetchDashboardData, 10000);
 });
+
+function updateAdminProfile() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        // Decode JWT Payload
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        const payload = JSON.parse(jsonPayload);
+        
+        // C# ClaimTypes.Name usually becomes 'unique_name' or 'name', but sometimes the full URL
+        const name = payload.unique_name || payload.name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || "Admin User";
+        const email = payload.email || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || "admin@example.com";
+        
+        // Extract 2 letters for initials
+        const initials = name.substring(0, 2).toUpperCase();
+
+        document.getElementById('adminInitials').innerText = initials;
+        document.getElementById('adminName').innerText = name;
+        document.getElementById('adminEmail').innerText = email;
+    } catch (e) {
+        console.error("Failed to parse token for profile:", e);
+    }
+}
 
 async function fetchDashboardData() {
     try {
@@ -42,14 +73,8 @@ async function fetchDashboardData() {
 }
 
 function logout() {
-    // 1. Tampilkan popup pesan ke pengguna
-    alert("Berhasil Logout dari Admin Dashboard (Mode Simulasi)");
-
-    // 2. Hapus token (jika ada)
     localStorage.removeItem('token');
-
-    // 3. Refresh halaman ke halaman utama (karena kita belum punya halaman login.html)
-    window.location.href = '/';
+    window.location.href = '/login.html';
 }
 
 

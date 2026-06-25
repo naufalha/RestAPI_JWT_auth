@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePassword.addEventListener('click', () => {
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
-        
+
         if (type === 'text') {
             eyeIcon.classList.remove('ph-eye');
             eyeIcon.classList.add('ph-eye-slash');
@@ -23,14 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle form submission
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const email = document.getElementById('email').value;
         const password = passwordInput.value;
         const submitBtn = loginForm.querySelector('button[type="submit"]');
 
         // Reset error state
         errorMsg.classList.add('hidden');
-        
+
         // Show loading state on button
         const originalBtnContent = submitBtn.innerHTML;
         submitBtn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i><span>Signing in...</span>`;
@@ -68,16 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Login error:', error);
-            // --- Fallback for demo purposes ---
-            // If the backend isn't ready or if there's a fetch error, we provide a mock login
-            if (email === 'admin@ekatva.com' && password === 'admin') {
-                setTimeout(() => {
-                    localStorage.setItem('token', 'mock_jwt_token_12345');
-                    window.location.href = '/index.html';
-                }, 1000);
-            } else {
-                showError(error.message || 'Failed to connect to the server. Please try again later.');
-            }
+            showError(error.message || 'Gagal terhubung ke server. Coba lagi nanti.');
         } finally {
             // Restore button state
             setTimeout(() => {
@@ -103,4 +94,62 @@ document.addEventListener('DOMContentLoaded', () => {
             { transform: 'translateX(0)' }
         ], { duration: 400, easing: 'ease-in-out' });
     }
+
+    // --- FITUR LOGIN GOOGLE ---
+    
+    // 1. Fungsi yang berjalan saat Google sukses verifikasi
+    async function handleGoogleLogin(googleResponse) {
+        errorMsg.classList.add('hidden'); // Sembunyikan error lama
+        
+        try {
+            // Kirim token Google ke pintu masuk Admin yang kita buat tadi
+            const res = await fetch('/api/auth/login/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: googleResponse.credential })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.token) {
+                    // Berhasil masuk Whitelist! Simpan tiketnya dan pindah ke dashboard
+                    localStorage.setItem('token', data.token);
+                    window.location.href = '/index.html';
+                }
+            } else {
+                // Email ditolak / Tidak ada di Whitelist
+                let errorData;
+                try { errorData = await res.json(); } catch(e) {}
+                showError(errorData?.error || 'Akses ditolak oleh server.');
+            }
+        } catch (error) {
+            showError('Tidak dapat terhubung ke server.');
+        }
+    }
+
+    // 2. Fungsi untuk memanggil tombol asli Google
+    async function initGoogleLogin() {
+        try {
+            // Mengambil nomor identitas (Client ID) dari server Anda
+            const response = await fetch('/api/auth/config');
+            if (!response.ok) throw new Error('Gagal mengambil konfigurasi');
+            const data = await response.json();
+            
+            // Menggambar tombol di kotak kosong yang kita siapkan di HTML
+            google.accounts.id.initialize({
+                client_id: data.googleClientId,
+                callback: handleGoogleLogin
+            });
+            
+            google.accounts.id.renderButton(
+                document.getElementById("googleAuthContainer"),
+                { theme: "outline", size: "large", width: "100%", text: "continue_with" }
+            );
+        } catch (error) {
+            console.error('Error inisialisasi Google Login:', error);
+        }
+    }
+    
+    // 3. Jalankan pembuat tombol saat halaman dibuka
+    initGoogleLogin();
 });
