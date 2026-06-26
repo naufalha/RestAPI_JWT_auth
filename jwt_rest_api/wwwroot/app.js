@@ -97,9 +97,22 @@ function updateUI(data) {
 
     if (data.players && data.players.length > 0) {
         data.players.forEach(p => {
+            // Generate deterministic colors based on psycho profile string length/characters
+            const pProfile = p.psychoProfile || 'Neutral';
             let badgeClass = 'bg-slate-100 text-slate-600';
-            if (p.psychoProfile === 'Empathetic') badgeClass = 'bg-purple-100 text-purple-700';
-            else if (p.psychoProfile === 'Pragmatic') badgeClass = 'bg-green-100 text-green-800';
+            
+            if (pProfile !== 'Neutral') {
+                const charCodeSum = pProfile.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+                const colorIndex = charCodeSum % 5;
+                const colors = [
+                    'bg-purple-100 text-purple-700',
+                    'bg-blue-100 text-blue-700',
+                    'bg-green-100 text-green-700',
+                    'bg-orange-100 text-orange-700',
+                    'bg-pink-100 text-pink-700'
+                ];
+                badgeClass = colors[colorIndex];
+            }
 
             const row = `
                 <tr>
@@ -196,37 +209,120 @@ function updateCharts(data) {
         });
     }
 
-    // ---- Psycho Profile Donut Chart ----
+    // ---- Psycho Profile Donut / Radar Chart ----
     const ctxPsycho = document.getElementById('psychoChart').getContext('2d');
 
-    // Count profiles
-    let empathetic = 0, pragmatic = 0, neutral = 0;
+    const profileCounts = {};
+    let totalProfiles = 0;
+    
+    let hasBigFive = false;
+    let bigFiveTotals = { "Neuroticism": 0, "Extraversion": 0, "Openness": 0, "Agreeableness": 0, "Conscientiousness": 0 };
+    let bigFiveCount = 0;
+
     data.players.forEach(p => {
-        if (p.psychoProfile === 'Empathetic') empathetic++;
-        else if (p.psychoProfile === 'Pragmatic') pragmatic++;
-        else neutral++;
+        let prof = p.psychoProfile || 'Neutral';
+        if (prof.startsWith('{')) {
+            try {
+                let parsed = JSON.parse(prof);
+                hasBigFive = true;
+                bigFiveTotals["Neuroticism"] += parsed["Neuroticism"] || 0;
+                bigFiveTotals["Extraversion"] += parsed["Extraversion"] || 0;
+                bigFiveTotals["Openness"] += parsed["Openness"] || 0;
+                bigFiveTotals["Agreeableness"] += parsed["Agreeableness"] || 0;
+                bigFiveTotals["Conscientiousness"] += parsed["Conscientiousness"] || 0;
+                bigFiveCount++;
+            } catch(e) { 
+                profileCounts['Invalid'] = (profileCounts['Invalid'] || 0) + 1;
+            }
+        } else {
+            profileCounts[prof] = (profileCounts[prof] || 0) + 1;
+        }
+        totalProfiles++;
     });
 
-    const totalProfiles = empathetic + pragmatic + neutral;
-    document.getElementById('chart-center-val').innerText = totalProfiles;
-
-    const psychoData = [empathetic, pragmatic, neutral];
-    // Don't show empty chart if 0
-    if (totalProfiles === 0) {
-        psychoData[2] = 1; // default neutral slice just to show something
+    // Destroy existing chart to allow type changes
+    if (psychoChartInstance) {
+        psychoChartInstance.destroy();
+        psychoChartInstance = null;
     }
 
-    if (psychoChartInstance) {
-        psychoChartInstance.data.datasets[0].data = psychoData;
-        psychoChartInstance.update();
+    if (hasBigFive) {
+        // Hide center text container
+        const centerContainer = document.getElementById('chart-center-container');
+        if (centerContainer) centerContainer.style.display = 'none';
+
+        // Calculate averages
+        const avgData = [
+            (bigFiveTotals["Neuroticism"] / bigFiveCount).toFixed(1),
+            (bigFiveTotals["Extraversion"] / bigFiveCount).toFixed(1),
+            (bigFiveTotals["Openness"] / bigFiveCount).toFixed(1),
+            (bigFiveTotals["Agreeableness"] / bigFiveCount).toFixed(1),
+            (bigFiveTotals["Conscientiousness"] / bigFiveCount).toFixed(1)
+        ];
+
+        psychoChartInstance = new Chart(ctxPsycho, {
+            type: 'radar',
+            data: {
+                labels: ['Neuroticism', 'Extraversion', 'Openness', 'Agreeableness', 'Conscientiousness'],
+                datasets: [{
+                    label: 'Avg Big Five Scores',
+                    data: avgData,
+                    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                    borderColor: '#a855f7',
+                    pointBackgroundColor: '#a855f7',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#a855f7'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: { family: "'Inter', sans-serif", size: 11, weight: '500' }
+                        }
+                    }
+                }
+            }
+        });
     } else {
+        // Show center text container
+        const centerContainer = document.getElementById('chart-center-container');
+        if (centerContainer) centerContainer.style.display = 'flex';
+        document.getElementById('chart-center-val').innerText = totalProfiles;
+
+        const labels = Object.keys(profileCounts);
+        const chartData = Object.values(profileCounts);
+        
+        const baseColors = ['#a855f7', '#3b82f6', '#22c55e', '#f59e0b', '#ec4899', '#ef4444', '#06b6d4'];
+        const bgColors = labels.map((label, index) => {
+            if (label === 'Neutral') return '#cbd5e1';
+            return baseColors[index % baseColors.length];
+        });
+
+        if (totalProfiles === 0) {
+            labels.push('Neutral');
+            chartData.push(1);
+            bgColors.push('#cbd5e1');
+        }
+
         psychoChartInstance = new Chart(ctxPsycho, {
             type: 'doughnut',
             data: {
-                labels: ['Empathetic', 'Pragmatic', 'Neutral'],
+                labels: labels,
                 datasets: [{
-                    data: psychoData,
-                    backgroundColor: ['#a855f7', '#22c55e', '#cbd5e1'],
+                    data: chartData,
+                    backgroundColor: bgColors,
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
@@ -255,4 +351,55 @@ function escapeHtml(unsafe) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+// UI Navigation: Switch Sidebar Tabs
+function switchTab(tabId) {
+    // 1. Hide all sections
+    document.getElementById('section-overview').classList.add('hidden');
+    document.getElementById('section-users').classList.add('hidden');
+    document.getElementById('section-analytics').classList.add('hidden');
+    // We can add 'flex' back if it's the analytics tab, but mostly we toggle 'hidden'
+    if (tabId === 'analytics') {
+        document.getElementById('section-analytics').classList.replace('hidden', 'flex');
+    } else {
+        document.getElementById('section-analytics').classList.replace('flex', 'hidden');
+        document.getElementById(`section-${tabId}`).classList.remove('hidden');
+    }
+
+    // 2. Reset all nav item styles to default
+    const tabs = ['overview', 'users', 'analytics'];
+    tabs.forEach(t => {
+        const nav = document.getElementById(`nav-${t}`);
+        if (nav) {
+            nav.className = 'flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-purple-600';
+        }
+    });
+
+    // 3. Highlight active tab
+    const activeNav = document.getElementById(`nav-${tabId}`);
+    if (activeNav) {
+        activeNav.className = 'flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer bg-slate-100 text-purple-600';
+    }
+}
+
+// UI Navigation: Filter Player Table
+function filterTable() {
+    const input = document.getElementById("playerSearchInput");
+    const filter = input.value.toLowerCase();
+    const tbody = document.getElementById("player-table-body");
+    const trs = tbody.getElementsByTagName("tr");
+
+    for (let i = 0; i < trs.length; i++) {
+        // Find the first td which contains name and email
+        const td = trs[i].getElementsByTagName("td")[0];
+        if (td) {
+            const textValue = td.textContent || td.innerText;
+            if (textValue.toLowerCase().indexOf(filter) > -1) {
+                trs[i].style.display = "";
+            } else {
+                trs[i].style.display = "none";
+            }
+        }
+    }
 }

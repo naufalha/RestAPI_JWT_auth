@@ -9,6 +9,8 @@ public interface IUnitOfWork : IDisposable
     IUserRepository Users { get; }
     IGameProgressRepository GameProgresses { get; }
     IRequestLogRepository RequestLogs { get; }
+    INpcInteractionRepository NpcInteractions { get; }
+    IGameSessionRepository GameSessions { get; }
 
     Task<int> SaveChangesAsync();
 }

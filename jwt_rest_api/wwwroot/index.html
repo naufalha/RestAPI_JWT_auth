@@ -41,15 +41,15 @@
 
         <div class="flex flex-col gap-2 flex-1">
             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2 mt-4">Main Menu</div>
-            <div
+            <div id="nav-overview" onclick="switchTab('overview')"
                 class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer bg-slate-100 text-purple-600">
                 <i class="ph ph-squares-four text-xl"></i> Overview
             </div>
-            <div
+            <div id="nav-users" onclick="switchTab('users')"
                 class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-purple-600">
                 <i class="ph ph-users text-xl"></i> Users & Players
             </div>
-            <div
+            <div id="nav-analytics" onclick="switchTab('analytics')"
                 class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition-colors cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-purple-600">
                 <i class="ph ph-chart-line-up text-xl"></i> Analytics
             </div>
@@ -86,14 +86,21 @@
             class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10 flex items-center justify-between px-8">
             <h1 class="text-xl font-semibold text-slate-800">System Overview</h1>
             <div class="flex items-center gap-4">
-                <button
-                    class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
-                    <i class="ph ph-bell text-xl"></i>
-                </button>
-                <button
-                    class="px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors"
+                <button id="refreshBtn"
+                    class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                     onclick="fetchDashboardData()">
-                    <i class="ph ph-arrows-clockwise mr-1"></i> Refresh Data
+                    <i class="ph ph-arrows-clockwise text-lg"></i>
+                    <span>Refresh Data</span>
+                </button>
+                <button id="seedIpipBtn"
+                    class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                    <i class="ph ph-database text-lg"></i>
+                    <span>Seed IPIP</span>
+                </button>
+                <button id="seedDummyBtn"
+                    class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                    <i class="ph ph-vial text-lg"></i>
+                    <span>Seed Dummy</span>
                 </button>
                 <button
                     class="px-4 py-2 bg-red-50 text-red-600 border border-red-100 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center"
@@ -106,128 +113,158 @@
         <!-- Content Padding -->
         <div class="p-8 max-w-7xl mx-auto">
 
-            <!-- Top Metric Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <!-- Card 1 -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <p class="text-sm font-medium text-slate-500 mb-1">Total Users</p>
-                            <h3 class="text-3xl font-bold text-slate-800" id="metric-users">-</h3>
+            <!-- OVERVIEW SECTION -->
+            <div id="section-overview">
+                <!-- Top Metric Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <!-- Card 1 -->
+                    <div
+                        class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500 mb-1">Total Users</p>
+                                <h3 class="text-3xl font-bold text-slate-800" id="metric-users">-</h3>
+                            </div>
+                            <div
+                                class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                                <i class="ph ph-users text-xl"></i>
+                            </div>
                         </div>
-                        <div
-                            class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
-                            <i class="ph ph-users text-xl"></i>
+                        <div class="flex items-center gap-1 text-sm">
+                            <span class="text-emerald-500 font-semibold flex items-center"><i
+                                    class="ph ph-trend-up mr-1"></i> Database</span>
+                            <span class="text-slate-400">Synced players</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1 text-sm">
-                        <span class="text-emerald-500 font-semibold flex items-center"><i
-                                class="ph ph-trend-up mr-1"></i> Database</span>
-                        <span class="text-slate-400">Synced players</span>
+
+                    <!-- Card 2 -->
+                    <div
+                        class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500 mb-1">Total API Requests</p>
+                                <h3 class="text-3xl font-bold text-slate-800" id="metric-requests">-</h3>
+                            </div>
+                            <div
+                                class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <i class="ph ph-activity text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 text-sm">
+                            <span class="text-emerald-500 font-semibold flex items-center"><i
+                                    class="ph ph-trend-up mr-1"></i> Live</span>
+                            <span class="text-slate-400">API hits logged</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div
+                        class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500 mb-1">Avg Player Level</p>
+                                <h3 class="text-3xl font-bold text-slate-800" id="metric-avg-level">-</h3>
+                            </div>
+                            <div
+                                class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                <i class="ph ph-star text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 text-sm">
+                            <span class="text-slate-500 font-semibold flex items-center">Ekatva Village</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Card 2 -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <p class="text-sm font-medium text-slate-500 mb-1">Total API Requests</p>
-                            <h3 class="text-3xl font-bold text-slate-800" id="metric-requests">-</h3>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                            <i class="ph ph-activity text-xl"></i>
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-6">
+                    <!-- Line Chart -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-base font-semibold text-slate-800 mb-4">Request Traffic Activity</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="trafficChart"></canvas>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1 text-sm">
-                        <span class="text-emerald-500 font-semibold flex items-center"><i
-                                class="ph ph-trend-up mr-1"></i> Live</span>
-                        <span class="text-slate-400">API hits logged</span>
+
+                    <!-- Donut Chart -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-base font-semibold text-slate-800">Psychological Profiles</h3>
+                        <div class="relative h-64 mt-4">
+                            <div class="relative w-full h-full flex items-center justify-center">
+                                <canvas id="psychoChart" class="max-h-full"></canvas>
+                                <div id="chart-center-container"
+                                    class="absolute flex flex-col items-center justify-center pointer-events-none">
+                                    <span id="chart-center-val" class="text-2xl font-bold text-slate-800">0</span>
+                                    <span class="text-xs text-slate-500">Profiles</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div> <!-- End of Overview Section -->
 
-                <!-- Card 3 -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <p class="text-sm font-medium text-slate-500 mb-1">Avg Player Level</p>
-                            <h3 class="text-3xl font-bold text-slate-800" id="metric-avg-level">-</h3>
-                        </div>
-                        <div
-                            class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                            <i class="ph ph-star text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1 text-sm">
-                        <span class="text-slate-500 font-semibold flex items-center">Ekatva Village</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-6">
-                <!-- Line Chart -->
+            <!-- USERS & PLAYERS SECTION -->
+            <div id="section-users" class="hidden">
+                <!-- Player Table -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-base font-semibold text-slate-800 mb-4">Request Traffic Activity</h3>
-                    <div class="h-64 w-full">
-                        <canvas id="trafficChart"></canvas>
-                    </div>
-                </div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-base font-semibold text-slate-800">Player Progress & Demographics</h3>
 
-                <!-- Donut Chart -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-base font-semibold text-slate-800 mb-4">Psychological Profiles</h3>
-                    <div class="h-64 w-full flex items-center justify-center relative">
-                        <canvas id="psychoChart"></canvas>
-                        <!-- Center text over donut -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span class="text-2xl font-bold text-slate-800" id="chart-center-val">-</span>
-                            <span class="text-xs font-medium text-slate-500">Profiles</span>
+                        <!-- Search Box -->
+                        <div class="relative w-64">
+                            <div
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                <i class="ph ph-magnifying-glass"></i>
+                            </div>
+                            <input type="text" id="playerSearchInput" oninput="filterTable()"
+                                placeholder="Search players..."
+                                class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 p-2 outline-none transition-all">
                         </div>
                     </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr>
+                                    <th
+                                        class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
+                                        Player Identity</th>
+                                    <th
+                                        class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
+                                        Level / Score</th>
+                                    <th
+                                        class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
+                                        In-Game Day</th>
+                                    <th
+                                        class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
+                                        Total Interactions</th>
+                                    <th
+                                        class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
+                                        Psycho Profile</th>
+                                </tr>
+                            </thead>
+                            <tbody id="player-table-body">
+                                <!-- Populated dynamically via JS -->
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-slate-500">Loading data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            </div> <!-- End of Users Section -->
 
-            <!-- Player Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-base font-semibold text-slate-800">Player Progress & Demographics</h3>
-                    <button class="text-sm font-medium text-purple-600 hover:text-purple-700">View All</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr>
-                                <th
-                                    class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
-                                    Player Identity</th>
-                                <th
-                                    class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
-                                    Level / Score</th>
-                                <th
-                                    class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
-                                    In-Game Day</th>
-                                <th
-                                    class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
-                                    Total Interactions</th>
-                                <th
-                                    class="text-xs uppercase tracking-wider text-slate-500 font-semibold pb-3 border-b border-slate-200 text-left">
-                                    Psycho Profile</th>
-                            </tr>
-                        </thead>
-                        <tbody id="player-table-body">
-                            <!-- Populated dynamically via JS -->
-                            <tr>
-                                <td colspan="5" class="text-center py-8 text-slate-500">Loading data...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Placeholder for Analytics Section -->
+            <div id="section-analytics" class="hidden flex-col items-center justify-center py-20 text-slate-400">
+                <i class="ph ph-chart-polar text-6xl mb-4 text-slate-300"></i>
+                <h2 class="text-xl font-medium text-slate-600 mb-2">Analytics Modules</h2>
+                <p>Advanced statistical models and detailed analytics will appear here.</p>
             </div>
 
         </div>
     </main>
 
-    <script src="app.js"></script>
+    <!-- Core Scripts -->
+    <script src="app.js?v=2"></script>
 </body>
 
 </html>

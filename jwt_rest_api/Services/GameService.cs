@@ -181,6 +181,8 @@ public class GameService : IGameService
             var totalRequests = await _unitOfWork.RequestLogs.GetTotalRequestsAsync();
 
             var usersWithProgress = await _unitOfWork.Users.GetUsersWithProgressAsync();
+            var allSessions = await _unitOfWork.GameSessions.GetAllWithDetailsAsync();
+            var sessionsLookup = allSessions.GroupBy(s => s.UserId).ToDictionary(g => g.Key, g => g.ToList());
 
             var playerStats = new List<PlayerStatDto>();
 
@@ -229,13 +231,77 @@ public class GameService : IGameService
                         stat.PhaseReached = 1;
                     }
 
-                    // For Interactions, we can mock it based on Level * Score
-                    stat.TotalInteractions = stat.Level * 2 + (stat.Score / 10);
+                    // Fetch interactions from GameSessions
+                    var userSessions = sessionsLookup.GetValueOrDefault(item.User.Id, new List<jwt_rest_api.Models.GameSession>());
+                    var userEncounters = userSessions.SelectMany(s => s.Events).SelectMany(e => e.Encounters).ToList();
                     
-                    // Simple logic for PsychoProfile based on Score
-                    if (stat.Score > 50) stat.PsychoProfile = "Empathetic";
-                    else if (stat.Score < 10 && stat.Level > 3) stat.PsychoProfile = "Pragmatic";
-                    else stat.PsychoProfile = "Neutral";
+                    stat.TotalInteractions = userEncounters.Count;
+                    
+                    if (userEncounters.Count > 0)
+                    {
+                        var userResponses = userEncounters.SelectMany(e => e.PlayerResponses).ToList();
+                        if (userResponses.Count > 0)
+                        {
+                            var traitScores = new Dictionary<string, int>
+                            {
+                                { "Neuroticism", 0 },
+                                { "Extraversion", 0 },
+                                { "Openness", 0 },
+                                { "Agreeableness", 0 },
+                                { "Conscientiousness", 0 }
+                            };
+
+                            var traitMap = new Dictionary<string, string>
+                            {
+                                { "N", "Neuroticism" },
+                                { "E", "Extraversion" },
+                                { "O", "Openness" },
+                                { "A", "Agreeableness" },
+                                { "C", "Conscientiousness" }
+                            };
+
+                            bool isIpipUsed = false;
+
+                            foreach(var resp in userResponses)
+                            {
+                                var qDef = jwt_rest_api.Common.IpipNeo60Dictionary.Questions.FirstOrDefault(q => q.Facet == resp.Domain);
+                                if (qDef != null)
+                                {
+                                    isIpipUsed = true;
+                                    int rawScore = resp.Weight; // Assuming 1-5
+                                    // Ensure rawScore is bounded 1-5 just in case
+                                    if (rawScore < 1) rawScore = 1;
+                                    if (rawScore > 5) rawScore = 5;
+                                    
+                                    int finalScore = qDef.IsReverse ? (6 - rawScore) : rawScore;
+                                    traitScores[traitMap[qDef.Trait]] += finalScore;
+                                }
+                            }
+
+                            if (isIpipUsed)
+                            {
+                                stat.PsychoProfile = System.Text.Json.JsonSerializer.Serialize(traitScores);
+                            }
+                            else 
+                            {
+                                // Fallback to old behavior
+                                var dominantProfile = userResponses
+                                    .GroupBy(r => r.Domain)
+                                    .OrderByDescending(g => g.Count())
+                                    .First()
+                                    .Key;
+                                stat.PsychoProfile = string.IsNullOrEmpty(dominantProfile) ? "Neutral" : dominantProfile;
+                            }
+                        }
+                        else
+                        {
+                            stat.PsychoProfile = "Neutral";
+                        }
+                    }
+                    else
+                    {
+                        stat.PsychoProfile = "Neutral";
+                    }
                 }
 
                 playerStats.Add(stat);

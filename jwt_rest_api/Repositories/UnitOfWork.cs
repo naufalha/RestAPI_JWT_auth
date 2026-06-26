@@ -8,18 +8,23 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly GameDbContext _dbContext;
 
-    public IUserRepository Users { get; private set; }
-    public IGameProgressRepository GameProgresses { get; private set; }
-    public IRequestLogRepository RequestLogs { get; private set; }
+    private IUserRepository? _users;
+    private IGameProgressRepository? _gameProgresses;
+    private IRequestLogRepository? _requestLogs;
+    private INpcInteractionRepository? _npcInteractions;
+    private IGameSessionRepository? _gameSessions;
+
+    public IUserRepository Users => _users ??= new UserRepository(_dbContext);
+    public IGameProgressRepository GameProgresses => _gameProgresses ??= new GameProgressRepository(_dbContext);
+    public IRequestLogRepository RequestLogs => _requestLogs ??= new RequestLogRepository(_dbContext);
+    public INpcInteractionRepository NpcInteractions => _npcInteractions ??= new NpcInteractionRepository(_dbContext);
+    public IGameSessionRepository GameSessions => _gameSessions ??= new GameSessionRepository(_dbContext);
 
     public UnitOfWork(GameDbContext dbContext)
     {
         _dbContext = dbContext;
         
         // Inisialisasi semua repository di sini, dengan memberikan kunci gudang (_dbContext) yang sama
-        Users = new UserRepository(_dbContext);
-        GameProgresses = new GameProgressRepository(_dbContext);
-        RequestLogs = new RequestLogRepository(_dbContext);
     }
 
     public async Task<int> SaveChangesAsync()
