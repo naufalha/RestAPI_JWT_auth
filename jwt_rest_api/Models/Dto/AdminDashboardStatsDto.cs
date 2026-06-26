@@ -8,6 +8,7 @@ public class AdminDashboardStatsDto
 {
     public int TotalUsers { get; set; }
     public int TotalRequests { get; set; }
+    public List<int> TrafficData { get; set; } = new();
     public List<PlayerStatDto> Players { get; set; } = new();
 }
 

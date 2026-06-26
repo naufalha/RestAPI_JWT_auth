@@ -7,6 +7,7 @@ using jwt_rest_api.Data;
 using jwt_rest_api.Services;
 using jwt_rest_api.Services.Authentication;
 using jwt_rest_api.Middlewares;
+using jwt_rest_api.Repositories;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +33,10 @@ builder.Services.AddScoped<IAuthStrategyFactory, AuthStrategyFactory>();
 
 // Configure Dependency Injection for Services
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGameProgressRepository, GameProgressRepository>();
+builder.Services.AddScoped<IRequestLogRepository, RequestLogRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IGameService, GameService>();
 
 // Tambahkan baris ini untuk menghidupkan AutoMapper!

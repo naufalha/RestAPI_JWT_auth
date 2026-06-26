@@ -145,14 +145,13 @@ function updateCharts(data) {
     // Create some fake historical "requests per minute" points
     const now = new Date();
     const labels = [];
-    const points = [];
+    const points = data.trafficData && data.trafficData.length === 6 
+        ? data.trafficData 
+        : [0, 0, 0, 0, 0, 0]; // fallback
 
     for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getTime() - i * 60000); // last 5 minutes
         labels.push(`${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`);
-
-        // Mock fluctuating requests per minute (e.g. between 2 and 15)
-        points.push(Math.floor(Math.random() * 14) + 2);
     }
 
     if (trafficChartInstance) {

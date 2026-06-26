@@ -8,18 +8,19 @@ using jwt_rest_api.Models;
 using jwt_rest_api.Models.Dto;
 using jwt_rest_api.Services.Authentication;
 using AutoMapper;
+using jwt_rest_api.Repositories;
 
 
 namespace jwt_rest_api.Services;
 
 public class GameService : IGameService
 {
-        private readonly GameDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork; // Panggil Mandor
     private readonly IMapper _mapper; // Tambahkan ini
 
-    public GameService(GameDbContext dbContext, IMapper mapper) // Tambahkan IMapper di sini
+    public GameService(IUnitOfWork unitOfWork, IMapper mapper) // Tambahkan IMapper di sini
     {
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
         _mapper = mapper; // Tambahkan ini
     }
 
@@ -27,9 +28,7 @@ public class GameService : IGameService
     {
         try
         {
-            var user = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.GoogleSubjectId == payload.SubjectId);
-
+           var user = await _unitOfWork.Users.GetByGoogleSubjectIdAsync(payload.SubjectId);
             if (user == null)
             {
                 user = new User
@@ -41,7 +40,7 @@ public class GameService : IGameService
                     CreatedAt = DateTime.UtcNow
                 };
 
-                _dbContext.Users.Add(user);
+                _unitOfWork.Users.Add(user);
                 
                 // Initialize default game progress for new user
                 var defaultProgress = new GameProgress
@@ -55,9 +54,9 @@ public class GameService : IGameService
                     LastUpdated = DateTime.UtcNow
                 };
                 
-                _dbContext.GameProgresses.Add(defaultProgress);
+                _unitOfWork.GameProgresses.Add(defaultProgress);
 
-                await _dbContext.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
 
             return Result<User>.Success(user);
@@ -72,8 +71,7 @@ public class GameService : IGameService
     {
         try
         {
-            var progress = await _dbContext.GameProgresses
-                .FirstOrDefaultAsync(gp => gp.UserId == userId);
+            var progress = await _unitOfWork.GameProgresses.GetByUserIdAsync(userId);
 
             if (progress == null)
             {
@@ -135,8 +133,7 @@ public class GameService : IGameService
                 }
             }
 
-            var progress = await _dbContext.GameProgresses
-                .FirstOrDefaultAsync(gp => gp.UserId == userId);
+            var progress = await _unitOfWork.GameProgresses.GetByUserIdAsync(userId);
 
             if (progress == null)
             {
@@ -167,7 +164,7 @@ public class GameService : IGameService
             progress.StateDataJson = stateDataJson;
             progress.LastUpdated = DateTime.UtcNow;
 
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             return Result.Success();
         }
         catch (Exception ex)
@@ -180,21 +177,10 @@ public class GameService : IGameService
     {
         try
         {
-            var totalUsers = await _dbContext.Users.CountAsync();
-            var totalRequests = await _dbContext.RequestLogs.CountAsync();
+            var totalUsers = await _unitOfWork.Users.GetTotalUsersAsync();
+            var totalRequests = await _unitOfWork.RequestLogs.GetTotalRequestsAsync();
 
-            var usersWithProgress = await _dbContext.Users
-                .GroupJoin(
-                    _dbContext.GameProgresses,
-                    u => u.Id,
-                    gp => gp.UserId,
-                    (u, gp) => new { User = u, Progresses = gp }
-                )
-                .SelectMany(
-                    x => x.Progresses.DefaultIfEmpty(),
-                    (x, gp) => new { x.User, Progress = gp }
-                )
-                .ToListAsync();
+            var usersWithProgress = await _unitOfWork.Users.GetUsersWithProgressAsync();
 
             var playerStats = new List<PlayerStatDto>();
 
@@ -259,6 +245,7 @@ public class GameService : IGameService
             {
                 TotalUsers = totalUsers,
                 TotalRequests = totalRequests,
+                TrafficData = await _unitOfWork.RequestLogs.GetRecentTrafficAsync(5),
                 Players = playerStats
             };
 
